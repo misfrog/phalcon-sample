@@ -1,0 +1,9 @@
+{
+    "name": "phalcon-sample",
+    "require": {
+        "oyejorge/less.php": "~1.5"
+    },
+    "config": {
+        "vendor-dir": "vendor/"
+    }
+}
