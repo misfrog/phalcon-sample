@@ -1,6 +1,7 @@
 .htaccess
 /cache
 /vendor
+/doc
 /app/config/config.php
 composer.lock
 composer.phar

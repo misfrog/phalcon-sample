@@ -18,6 +18,11 @@ try {
      * Read services
      */
     include __DIR__ . "/../app/config/services.php";
+    
+    /**
+     * Include modules
+     */
+    require __DIR__ . '/../app/config/modules.php';
 
 	/**
 	 * Compile application.less

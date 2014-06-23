@@ -1,10 +1,12 @@
 <?php
- 
+namespace Sample\Comments\Controllers;
+
 use Phalcon\Mvc\Model\Criteria;
 use Phalcon\Paginator\Adapter\Model as Paginator;
 
-class PostsController extends ControllerBase
+class CommentsController extends ControllerBase
 {
+
     /**
      * Index action
      */
@@ -14,13 +16,14 @@ class PostsController extends ControllerBase
     }
 
     /**
-     * Searches for posts
+     * Searches for comments
      */
     public function searchAction()
     {
+
         $numberPage = 1;
         if ($this->request->isPost()) {
-            $query = Criteria::fromInput($this->di, "Posts", $_POST);
+            $query = Criteria::fromInput($this->di, "Comments", $_POST);
             $this->persistent->parameters = $query->getParams();
         } else {
             $numberPage = $this->request->getQuery("page", "int");
@@ -32,18 +35,18 @@ class PostsController extends ControllerBase
         }
         $parameters["order"] = "id";
 
-        $posts = Posts::find($parameters);
-        if (count($posts) == 0) {
-            $this->flash->notice("The search did not find any posts");
+        $comments = Comments::find($parameters);
+        if (count($comments) == 0) {
+            $this->flash->notice("The search did not find any comments");
 
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "index"
             ));
         }
 
         $paginator = new Paginator(array(
-            "data" => $posts,
+            "data" => $comments,
             "limit"=> 10,
             "page" => $numberPage
         ));
@@ -60,7 +63,7 @@ class PostsController extends ControllerBase
     }
 
     /**
-     * Edits a post
+     * Edits a comment
      *
      * @param string $id
      */
@@ -69,66 +72,66 @@ class PostsController extends ControllerBase
 
         if (!$this->request->isPost()) {
 
-            $post = Posts::findFirstByid($id);
-            if (!$post) {
-                $this->flash->error("post was not found");
+            $comment = Comments::findFirstByid($id);
+            if (!$comment) {
+                $this->flash->error("comment was not found");
 
                 return $this->dispatcher->forward(array(
-                    "controller" => "posts",
+                    "controller" => "comments",
                     "action" => "index"
                 ));
             }
 
-            $this->view->id = $post->id;
+            $this->view->id = $comment->id;
 
-            $this->tag->setDefault("id", $post->id);
-            $this->tag->setDefault("title", $post->title);
-            $this->tag->setDefault("content", $post->content);
+            $this->tag->setDefault("id", $comment->id);
+            $this->tag->setDefault("post_id", $comment->post_id);
+            $this->tag->setDefault("body", $comment->body);
             
         }
     }
 
     /**
-     * Creates a new post
+     * Creates a new comment
      */
     public function createAction()
     {
 
         if (!$this->request->isPost()) {
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "index"
             ));
         }
 
-        $post = new Posts();
+        $comment = new Comments();
 
-        $post->title = $this->request->getPost("title");
-        $post->content = $this->request->getPost("content");
+        $comment->post_id = $this->request->getPost("post_id");
+        $comment->body = $this->request->getPost("body");
         
 
-        if (!$post->save()) {
-            foreach ($post->getMessages() as $message) {
+        if (!$comment->save()) {
+            foreach ($comment->getMessages() as $message) {
                 $this->flash->error($message);
             }
 
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "new"
             ));
         }
 
-        $this->flash->success("post was created successfully");
+        $this->flash->success("comment was created successfully");
 
         return $this->dispatcher->forward(array(
-            "controller" => "posts",
+            "controller" => "comments",
             "action" => "index"
         ));
 
     }
 
     /**
-     * Saves a post edited
+     * Saves a comment edited
      *
      */
     public function saveAction()
@@ -136,83 +139,83 @@ class PostsController extends ControllerBase
 
         if (!$this->request->isPost()) {
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "index"
             ));
         }
 
         $id = $this->request->getPost("id");
 
-        $post = Posts::findFirstByid($id);
-        if (!$post) {
-            $this->flash->error("post does not exist " . $id);
+        $comment = Comments::findFirstByid($id);
+        if (!$comment) {
+            $this->flash->error("comment does not exist " . $id);
 
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "index"
             ));
         }
 
-        $post->title = $this->request->getPost("title");
-        $post->content = $this->request->getPost("content");
+        $comment->post_id = $this->request->getPost("post_id");
+        $comment->body = $this->request->getPost("body");
         
 
-        if (!$post->save()) {
+        if (!$comment->save()) {
 
-            foreach ($post->getMessages() as $message) {
+            foreach ($comment->getMessages() as $message) {
                 $this->flash->error($message);
             }
 
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "edit",
-                "params" => array($post->id)
+                "params" => array($comment->id)
             ));
         }
 
-        $this->flash->success("post was updated successfully");
+        $this->flash->success("comment was updated successfully");
 
         return $this->dispatcher->forward(array(
-            "controller" => "posts",
+            "controller" => "comments",
             "action" => "index"
         ));
 
     }
 
     /**
-     * Deletes a post
+     * Deletes a comment
      *
      * @param string $id
      */
     public function deleteAction($id)
     {
 
-        $post = Posts::findFirstByid($id);
-        if (!$post) {
-            $this->flash->error("post was not found");
+        $comment = Comments::findFirstByid($id);
+        if (!$comment) {
+            $this->flash->error("comment was not found");
 
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "index"
             ));
         }
 
-        if (!$post->delete()) {
+        if (!$comment->delete()) {
 
-            foreach ($post->getMessages() as $message) {
+            foreach ($comment->getMessages() as $message) {
                 $this->flash->error($message);
             }
 
             return $this->dispatcher->forward(array(
-                "controller" => "posts",
+                "controller" => "comments",
                 "action" => "search"
             ));
         }
 
-        $this->flash->success("post was deleted successfully");
+        $this->flash->success("comment was deleted successfully");
 
         return $this->dispatcher->forward(array(
-            "controller" => "posts",
+            "controller" => "comments",
             "action" => "index"
         ));
     }
