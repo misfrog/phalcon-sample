@@ -12,9 +12,15 @@ class Comments extends \Phalcon\Mvc\Model
 
     /**
      *
+     * @var string
+     */
+    public $model;
+
+    /**
+     *
      * @var integer
      */
-    public $post_id;
+    public $model_id;
 
     /**
      *

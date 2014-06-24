@@ -16,7 +16,8 @@
     <thead>
         <tr>
             <th>Id</th>
-            <th>Post</th>
+            <th>Model</th>
+            <th>Model</th>
             <th>Body</th>
          </tr>
     </thead>
@@ -25,7 +26,8 @@
     {% for comment in page.items %}
         <tr>
             <td>{{ comment.id }}</td>
-            <td>{{ comment.post_id }}</td>
+            <td>{{ comment.model }}</td>
+            <td>{{ comment.model_id }}</td>
             <td>{{ comment.body }}</td>
             <td>{{ link_to("comments/edit/"~comment.id, "Edit") }}</td>
             <td>{{ link_to("comments/delete/"~comment.id, "Delete") }}</td>

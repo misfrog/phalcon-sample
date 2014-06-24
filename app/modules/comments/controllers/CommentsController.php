@@ -4,6 +4,7 @@ namespace Sample\Comments\Controllers;
 use Phalcon\Mvc\Model\Criteria;
 use Phalcon\Paginator\Adapter\Model as Paginator;
 use Sample\Controllers\ControllerBase;
+use Sample\Comments\Models\Comments;
 
 class CommentsController extends ControllerBase
 {
@@ -12,9 +13,7 @@ class CommentsController extends ControllerBase
      */
     public function indexAction()
     {
-//     	var_dump('aaa');
-//     	exit;
-        //$this->persistent->parameters = null;
+        $this->persistent->parameters = null;
     }
 
     /**
@@ -87,7 +86,8 @@ class CommentsController extends ControllerBase
             $this->view->id = $comment->id;
 
             $this->tag->setDefault("id", $comment->id);
-            $this->tag->setDefault("post_id", $comment->post_id);
+            $this->tag->setDefault("model", $comment->model);
+            $this->tag->setDefault("model_id", $comment->model_id);
             $this->tag->setDefault("body", $comment->body);
             
         }
@@ -108,7 +108,8 @@ class CommentsController extends ControllerBase
 
         $comment = new Comments();
 
-        $comment->post_id = $this->request->getPost("post_id");
+        $comment->model = $this->request->getPost("model");
+        $comment->model_id = $this->request->getPost("model_id");
         $comment->body = $this->request->getPost("body");
         
 
@@ -125,11 +126,7 @@ class CommentsController extends ControllerBase
 
         $this->flash->success("comment was created successfully");
 
-        return $this->dispatcher->forward(array(
-            "controller" => "comments",
-            "action" => "index"
-        ));
-
+        $this->response->redirect("posts/view/" . $comment->model_id);
     }
 
     /**
@@ -158,7 +155,8 @@ class CommentsController extends ControllerBase
             ));
         }
 
-        $comment->post_id = $this->request->getPost("post_id");
+        $comment->model = $this->request->getPost("model");
+        $comment->model_id = $this->request->getPost("model_id");
         $comment->body = $this->request->getPost("body");
         
 

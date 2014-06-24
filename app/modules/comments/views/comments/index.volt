@@ -22,10 +22,18 @@
     </tr>
     <tr>
         <td align="right">
-            <label for="post_id">Post</label>
+            <label for="model">Model</label>
         </td>
         <td align="left">
-            {{ text_field("post_id", "type" : "numeric") }}
+            {{ text_field("model", "size" : 30) }}
+        </td>
+    </tr>
+    <tr>
+        <td align="right">
+            <label for="model_id">Model</label>
+        </td>
+        <td align="left">
+            {{ text_field("model_id", "type" : "numeric") }}
         </td>
     </tr>
     <tr>

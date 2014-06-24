@@ -5,6 +5,7 @@ use Phalcon\Loader;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View\Engine\Volt as VoltEngine;
+use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 
 class Module implements ModuleDefinitionInterface
 {
@@ -29,6 +30,11 @@ class Module implements ModuleDefinitionInterface
 	public function registerServices($di)
 	{
 		/**
+		 * Read configuration
+		 */
+		$config = include __DIR__ . "/../../config/config.php";
+		
+		/**
 		 * Setting up the view component
 		 */
 		$di->set('view', function() {
@@ -50,6 +56,15 @@ class Module implements ModuleDefinitionInterface
 			));
 
 			return $view;
+		});
+		
+		$di->set('db', function () use ($config) {
+			return new DbAdapter(array(
+				'host' => $config->database->host,
+				'username' => $config->database->username,
+				'password' => $config->database->password,
+				'dbname' => $config->database->dbname
+			));
 		});
 	}
 }

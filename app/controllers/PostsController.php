@@ -3,219 +3,254 @@ namespace Sample\Controllers;
 
 use Phalcon\Mvc\Model\Criteria;
 use Phalcon\Paginator\Adapter\Model as Paginator;
+use Sample\Models\Posts;
+use Sample\Comments\Models\Comments;
 
 class PostsController extends ControllerBase
 {
-    /**
-     * Index action
-     */
-    public function indexAction()
-    {
-        $this->persistent->parameters = null;
-    }
+	/**
+	 * Index action
+	 */
+	public function indexAction()
+	{
+		//$this->persistent->parameters = null;
+		$posts = Posts::find();
+		$paginator = new Paginator(array(
+			"data" => $posts,
+			"limit"=> 10,
+			"page" => $this->request->getQuery("page", "int")
+		));
 
-    /**
-     * Searches for posts
-     */
-    public function searchAction()
-    {
-        $numberPage = 1;
-        if ($this->request->isPost()) {
-            $query = Criteria::fromInput($this->di, "Posts", $_POST);
-            $this->persistent->parameters = $query->getParams();
-        } else {
-            $numberPage = $this->request->getQuery("page", "int");
-        }
+		$this->view->page = $paginator->getPaginate();
+	}
 
-        $parameters = $this->persistent->parameters;
-        if (!is_array($parameters)) {
-            $parameters = array();
-        }
-        $parameters["order"] = "id";
+	/**
+	 * Searches for posts
+	 */
+	public function searchAction()
+	{
 
-        $posts = Posts::find($parameters);
-        if (count($posts) == 0) {
-            $this->flash->notice("The search did not find any posts");
+		$numberPage = 1;
+		if ($this->request->isPost()) {
+			$query = Criteria::fromInput($this->di, "Posts", $_POST);
+			$this->persistent->parameters = $query->getParams();
+		} else {
+			$numberPage = $this->request->getQuery("page", "int");
+		}
 
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "index"
-            ));
-        }
+		$parameters = $this->persistent->parameters;
+		if (!is_array($parameters)) {
+			$parameters = array();
+		}
+		$parameters["order"] = "id";
 
-        $paginator = new Paginator(array(
-            "data" => $posts,
-            "limit"=> 10,
-            "page" => $numberPage
-        ));
+		$posts = Posts::find($parameters);
+		if (count($posts) == 0) {
+			$this->flash->notice("The search did not find any posts");
 
-        $this->view->page = $paginator->getPaginate();
-    }
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "index"
+			));
+		}
 
-    /**
-     * Displayes the creation form
-     */
-    public function newAction()
-    {
+		$paginator = new Paginator(array(
+			"data" => $posts,
+			"limit"=> 10,
+			"page" => $numberPage
+		));
 
-    }
+		$this->view->page = $paginator->getPaginate();
+	}
 
-    /**
-     * Edits a post
-     *
-     * @param string $id
-     */
-    public function editAction($id)
-    {
+	/**
+	 * Displayes the creation form
+	 */
+	public function newAction()
+	{
 
-        if (!$this->request->isPost()) {
+	}
 
-            $post = Posts::findFirstByid($id);
-            if (!$post) {
-                $this->flash->error("post was not found");
+	/**
+	 * Edits a post
+	 *
+	 * @param string $id
+	 */
+	public function editAction($id)
+	{
 
-                return $this->dispatcher->forward(array(
-                    "controller" => "posts",
-                    "action" => "index"
-                ));
-            }
+		if (!$this->request->isPost()) {
 
-            $this->view->id = $post->id;
+			$post = Posts::findFirstByid($id);
+			if (!$post) {
+				$this->flash->error("post was not found");
 
-            $this->tag->setDefault("id", $post->id);
-            $this->tag->setDefault("title", $post->title);
-            $this->tag->setDefault("content", $post->content);
-            
-        }
-    }
+				return $this->dispatcher->forward(array(
+					"controller" => "posts",
+					"action" => "index"
+				));
+			}
 
-    /**
-     * Creates a new post
-     */
-    public function createAction()
-    {
+			$this->view->id = $post->id;
 
-        if (!$this->request->isPost()) {
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "index"
-            ));
-        }
+			$this->tag->setDefault("id", $post->id);
+			$this->tag->setDefault("title", $post->title);
+			$this->tag->setDefault("content", $post->content);
 
-        $post = new Posts();
+		}
+	}
 
-        $post->title = $this->request->getPost("title");
-        $post->content = $this->request->getPost("content");
-        
+	/**
+	 * Creates a new post
+	 */
+	public function createAction()
+	{
 
-        if (!$post->save()) {
-            foreach ($post->getMessages() as $message) {
-                $this->flash->error($message);
-            }
+		if (!$this->request->isPost()) {
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "index"
+			));
+		}
 
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "new"
-            ));
-        }
+		$post = new Posts();
 
-        $this->flash->success("post was created successfully");
+		$post->title = $this->request->getPost("title");
+		$post->content = $this->request->getPost("content");
 
-        return $this->dispatcher->forward(array(
-            "controller" => "posts",
-            "action" => "index"
-        ));
 
-    }
+		if (!$post->save()) {
+			foreach ($post->getMessages() as $message) {
+				$this->flash->error($message);
+			}
 
-    /**
-     * Saves a post edited
-     *
-     */
-    public function saveAction()
-    {
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "new"
+			));
+		}
 
-        if (!$this->request->isPost()) {
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "index"
-            ));
-        }
+		$this->flash->success("post was created successfully");
 
-        $id = $this->request->getPost("id");
+		return $this->dispatcher->forward(array(
+			"controller" => "posts",
+			"action" => "index"
+		));
 
-        $post = Posts::findFirstByid($id);
-        if (!$post) {
-            $this->flash->error("post does not exist " . $id);
+	}
 
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "index"
-            ));
-        }
+	/**
+	 * Saves a post edited
+	 *
+	 */
+	public function saveAction()
+	{
 
-        $post->title = $this->request->getPost("title");
-        $post->content = $this->request->getPost("content");
-        
+		if (!$this->request->isPost()) {
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "index"
+			));
+		}
 
-        if (!$post->save()) {
+		$id = $this->request->getPost("id");
 
-            foreach ($post->getMessages() as $message) {
-                $this->flash->error($message);
-            }
+		$post = Posts::findFirstByid($id);
+		if (!$post) {
+			$this->flash->error("post does not exist " . $id);
 
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "edit",
-                "params" => array($post->id)
-            ));
-        }
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "index"
+			));
+		}
 
-        $this->flash->success("post was updated successfully");
+		$post->title = $this->request->getPost("title");
+		$post->content = $this->request->getPost("content");
 
-        return $this->dispatcher->forward(array(
-            "controller" => "posts",
-            "action" => "index"
-        ));
 
-    }
+		if (!$post->save()) {
 
-    /**
-     * Deletes a post
-     *
-     * @param string $id
-     */
-    public function deleteAction($id)
-    {
+			foreach ($post->getMessages() as $message) {
+				$this->flash->error($message);
+			}
 
-        $post = Posts::findFirstByid($id);
-        if (!$post) {
-            $this->flash->error("post was not found");
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "edit",
+				"params" => array($post->id)
+			));
+		}
 
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "index"
-            ));
-        }
+		$this->flash->success("post was updated successfully");
 
-        if (!$post->delete()) {
+		return $this->dispatcher->forward(array(
+			"controller" => "posts",
+			"action" => "index"
+		));
 
-            foreach ($post->getMessages() as $message) {
-                $this->flash->error($message);
-            }
+	}
 
-            return $this->dispatcher->forward(array(
-                "controller" => "posts",
-                "action" => "search"
-            ));
-        }
+	/**
+	 * Deletes a post
+	 *
+	 * @param string $id
+	 */
+	public function deleteAction($id)
+	{
 
-        $this->flash->success("post was deleted successfully");
+		$post = Posts::findFirstByid($id);
+		if (!$post) {
+			$this->flash->error("post was not found");
 
-        return $this->dispatcher->forward(array(
-            "controller" => "posts",
-            "action" => "index"
-        ));
-    }
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "index"
+			));
+		}
 
+		if (!$post->delete()) {
+
+			foreach ($post->getMessages() as $message) {
+				$this->flash->error($message);
+			}
+
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "search"
+			));
+		}
+
+		$this->flash->success("post was deleted successfully");
+
+		return $this->dispatcher->forward(array(
+			"controller" => "posts",
+			"action" => "index"
+		));
+	}
+
+	public function viewAction($id)
+	{
+		$post = Posts::findFirstByid($id);
+		if (!$post) {
+			$this->flash->error("post was not found");
+
+			return $this->dispatcher->forward(array(
+				"controller" => "posts",
+				"action" => "index"
+			));
+		}
+
+		$comments = Comments::find(array(
+			'conditions' => array(
+				'model' => 'Posts',
+				'model_id' => $id
+			)
+		));
+
+		$this->view->setVars(array(
+			"post" => $post,
+			"comments" => $comments
+		));
+	}
 }
