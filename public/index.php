@@ -19,11 +19,6 @@ try {
      */
     include __DIR__ . "/../app/config/services.php";
     
-    /**
-     * Include modules
-     */
-    require __DIR__ . '/../app/config/modules.php';
-
 	/**
 	 * Compile application.less
 	 */
@@ -34,6 +29,11 @@ try {
      * Handle the request
      */
     $application = new \Phalcon\Mvc\Application($di);
+
+    /**
+     * Include modules
+     */
+    require __DIR__ . '/../app/config/modules.php';
 
     echo $application->handle()->getContent();
 

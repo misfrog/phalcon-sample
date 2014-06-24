@@ -3,16 +3,18 @@ namespace Sample\Comments\Controllers;
 
 use Phalcon\Mvc\Model\Criteria;
 use Phalcon\Paginator\Adapter\Model as Paginator;
+use Sample\Controllers\ControllerBase;
 
 class CommentsController extends ControllerBase
 {
-
     /**
      * Index action
      */
     public function indexAction()
     {
-        $this->persistent->parameters = null;
+//     	var_dump('aaa');
+//     	exit;
+        //$this->persistent->parameters = null;
     }
 
     /**
