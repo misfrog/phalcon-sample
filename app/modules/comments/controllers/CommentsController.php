@@ -97,36 +97,30 @@ class CommentsController extends ControllerBase
      * Creates a new comment
      */
     public function createAction()
-    {
-
+    {    
         if (!$this->request->isPost()) {
             return $this->dispatcher->forward(array(
                 "controller" => "comments",
                 "action" => "index"
             ));
         }
-
-        $comment = new Comments();
-
+    
+        $comment = new Comments();    
         $comment->model = $this->request->getPost("model");
         $comment->model_id = $this->request->getPost("model_id");
         $comment->body = $this->request->getPost("body");
         
-
         if (!$comment->save()) {
             foreach ($comment->getMessages() as $message) {
                 $this->flash->error($message);
             }
-
-            return $this->dispatcher->forward(array(
-                "controller" => "comments",
-                "action" => "new"
-            ));
+        } else {
+            $this->flash->success("comment was created successfully");
         }
-
-        $this->flash->success("comment was created successfully");
-
-        $this->response->redirect("posts/view/" . $comment->model_id);
+        
+        $referer = $this->request->getHTTPReferer();
+        $path = parse_url($referer, PHP_URL_PATH);
+        $this->response->redirect($path, true);
     }
 
     /**
